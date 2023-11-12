@@ -7,3 +7,4 @@ dash
 diskcache
 multiprocess
 psutil
+dash-bootstrap-components

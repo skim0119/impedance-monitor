@@ -83,8 +83,13 @@ def plot_impedance_progress_px(df, vmin=0.01, vmax=5.0, safe_min_y=0.02, safe_ma
     fig_rel.add_hrect(y0=safe_max_y, y1=vmax, line_width=0, fillcolor="red", opacity=0.2)
 
     # Average
+    df_drop = df.drop(df.loc[df['impedance'] > safe_max_y].index)
+    df.drop(df_drop.loc[df['impedance'] < safe_min_y].index, inplace=True)
+    df_drop = df.groupby(["day in use", "tag"])["impedance"].count().to_frame(name="count").reset_index()
     df_mean = df.groupby(["day in use", "tag"])["impedance"].mean().to_frame(name="mean").reset_index()
-    fig_mean = px.line(df_mean, x="day in use", y="mean", color="tag", labels={"impedance":ylabel}, log_y=True, range_y=range_y, markers=True)
+    df_mean = pd.merge(df_mean, df_drop, on=["day in use", "tag"])  # merge
+    fig_mean = px.line(df_mean, x="day in use", y="mean", color="tag", labels={"mean":ylabel}, text="count", log_y=True, range_y=range_y, markers=True, title="(label is number of active channels)")
+    fig_mean.update_traces(textposition="top center")
     fig_mean.update_xaxes(minor=dict(ticks="inside", showgrid=True))
     fig_mean.update_yaxes(minor=dict(ticks="inside", showgrid=True))
     fig_mean.add_hrect(y0=vmin, y1=safe_min_y, line_width=0, fillcolor="red", opacity=0.2)
