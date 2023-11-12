@@ -15,13 +15,11 @@ def get_tag_checklist(df):
     df_old.sort_values(by=["Last Measured Date"], inplace=True, ascending=False)
 
     all_tag_list = list(df["Tag Number"].astype(str))
-    print(f"{all_tag_list=}")
     all_tag_list.sort()
     all_tag_list_group = list(np.array_split(all_tag_list, 6))
 
     old_tag_list = list(set(df_old["Tag Number"].astype(str)) - set(all_tag_list))
     old_tag_list.sort()
-    print(f"{old_tag_list=}")
     old_tag_list_group = list(np.array_split(old_tag_list, 6))
 
     def make_child(labels, i, tag):
