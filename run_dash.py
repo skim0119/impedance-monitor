@@ -53,7 +53,7 @@ app.layout = html.Div([
 
 @app.callback(
     Output("selected-tags-tbl", "data"),
-    Input("tag-checklist", "value"),
+    Input("tag-checklist", "data"),
 )
 def display_selected_tags_table(tags):
     if len(tags) == 0:
@@ -64,7 +64,7 @@ def display_selected_tags_table(tags):
 
 @app.callback(
     Output("selected-impedances-tbl", "data"),
-    Input("tag-checklist", "value"),
+    Input("tag-checklist", "data"),
 )
 def display_selected_tags_table(tags):
     if len(tags) == 0:
@@ -75,7 +75,7 @@ def display_selected_tags_table(tags):
 
 @app.long_callback(
     output=[Output("graph-abs", "figure"), Output("graph-rel", "figure"), Output("graph-mean", "figure")], 
-    inputs=Input("tag-checklist", "value"),
+    inputs=Input("tag-checklist", "data"),
     progress=[
         Output("graph-progress", "value"),
         Output("graph-progress", "max"),
