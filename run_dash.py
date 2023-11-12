@@ -102,4 +102,4 @@ def generate_plot(set_progress, tags):
 
 
 if __name__ == "__main__":
-    app.run_server(debug=True)
+    app.run_server("0.0.0.0", 8000, debug=True)
