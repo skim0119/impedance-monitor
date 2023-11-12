@@ -8,32 +8,36 @@ from dash import Dash, dcc, html, Input, Output, State, callback, callback_conte
 
 def get_tag_checklist(df):
     # split df by date: 2 month old or newer
-    df = df[df["Last Measured Date"] >= (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")].copy()
     df_old = df[df["Last Measured Date"] < (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")].copy()
+    df = df[df["Last Measured Date"] >= (datetime.now() - timedelta(days=60)).strftime("%Y-%m-%d")].copy()
 
     df.sort_values(by=["Last Measured Date"], inplace=True, ascending=False)
     df_old.sort_values(by=["Last Measured Date"], inplace=True, ascending=False)
 
-    all_tag_list = list(df["Tag Number"])
+    all_tag_list = list(df["Tag Number"].astype(str))
+    print(f"{all_tag_list=}")
     all_tag_list.sort()
     all_tag_list_group = list(np.array_split(all_tag_list, 6))
 
-    old_tag_list = list(df_old["Tag Number"])
+    old_tag_list = list(set(df_old["Tag Number"].astype(str)) - set(all_tag_list))
     old_tag_list.sort()
+    print(f"{old_tag_list=}")
+    old_tag_list_group = list(np.array_split(old_tag_list, 6))
 
-    def make_child(i):
+    def make_child(labels, i, tag):
         return html.Div(
                 style={'width':'15%', 'height':'100%', 'float':'left'},
                 children=[
                     dcc.Checklist(
-                        all_tag_list_group[i],
+                        labels,
                         className=f'checkbox_1',
-                        id=f'tag-checklist-new-{i}',
+                        id=f'{tag}-{i}',
                         style={'label':{'color':'red'}, 'box': {'shape':'round'}},
                     ),
                 ]
             )
-    all_tag_checklists = [make_child(i) for i in range(6)]
+    all_tag_checklists = [make_child(all_tag_list_group[i], i, "tag-checklist-new") for i in range(6)]
+    old_tag_checklists = [make_child(old_tag_list_group[i], i, "tag-checklist-old") for i in range(6)]
 
     tag_checklist = html.Div([
         html.Div(all_tag_checklists), # [ dcc.Checklist(["All"], [], id="all-checklist-new", style={'label':{'color':'red'}, 'box': {'shape':'round'}}, inline=True), ]
@@ -42,12 +46,13 @@ def get_tag_checklist(df):
         #dbc.Button("Show Old MEA Tags:", id="collapse-button-show-old-tags", n_clicks=0, color="primary", className="mb-3"),
         #dbc.Collapse(
         html.H5("Old MEA Tags (>2 months):"),
-        dcc.Checklist(old_tag_list, [], id="tag-checklist-old", inline=True),
+        html.Div(old_tag_checklists),
+        html.Br(style={'clear':'both'}),
         #    id="collapse",
         #    is_open=False,
         #    style={"visibility": "visible"},
         #),
-        dcc.Checklist(all_tag_list+old_tag_list, [], id="tag-checklist", inline=True), #, style={"visibility": "hidden"}, inline=True),
+        dcc.Store(data=all_tag_list+old_tag_list, id="tag-checklist"),
     ])
 
     return tag_checklist
@@ -96,8 +101,8 @@ def get_tag_checklist(df):
 #     return cities_selected, all_selected
 
 @app.callback(
-    Output("tag-checklist", "value"),
-    [Input(f"tag-checklist-new-{i}", "value") for i in range(6)]+[Input("tag-checklist-old", "value")],
+    Output("tag-checklist", "data"),
+    [Input(f"tag-checklist-new-{i}", "value") for i in range(6)]+[Input(f"tag-checklist-old-{i}", "value") for i in range(6)],
 )
 def merge_checklists(*selected):
     tags = []
