@@ -6,6 +6,7 @@ from dash import Dash, dcc, html, Input, Output, State, callback, callback_conte
 
 from app.maindash import app# , cache, long_callback_manager 
 from app.views.tag_selection import get_tag_checklist
+from app.views.sidebar import get_sidebar, CONTENT_STYLE, BANNER_STYLE
 from app.analyze import create_histogram_dataframe, plot_impedance_progress_px, plot_empty_px
 from app.load_data import data
 
@@ -18,9 +19,11 @@ mea_tags = data["mea tags"]
 # ---------------------------- App ----------------------------
 
 tag_checklist = get_tag_checklist(catalogue)
+sidebar = get_sidebar(catalogue)
 
-app.layout = html.Div([
-    html.H3("MiV-MEA Impedance Dashboard"),
+contents = html.Div([
+    html.H5("MEA Impedance Statistics", style={"text-align":"center"}),
+    html.Hr(),
     html.A("Link to data-table", href='https://docs.google.com/spreadsheets/d/1ilXTYVzPgkgflllW1U8HYPK_UBe_ebNuQeCdjzoNhCA/edit?usp=sharing', target="_blank"),
     html.H4("MEA-tag:"),
     tag_checklist,
@@ -42,7 +45,22 @@ app.layout = html.Div([
     html.H5("Selected tags impedance:"),
     dash_table.DataTable(impedances.to_dict('records'), id='selected-impedances-tbl'),
 
-])
+], style=CONTENT_STYLE)
+
+banner = html.Div(
+    id="banner",
+    className="banner",
+    children=[
+        html.Img(src="https://miv-os.readthedocs.io/en/latest/_static/logo1.svg", style=BANNER_STYLE),
+    ],
+    style={"background-color": "#6262FF"},
+)
+
+app.layout = html.Div([
+    banner,
+    sidebar,
+    contents
+], id="app-container")
 
 # ---------------------- Callbacks ---------------------------
 
