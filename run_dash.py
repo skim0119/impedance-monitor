@@ -1,5 +1,7 @@
 import sys
 
+import pandas as pd
+
 from dash import Dash, dcc, html, Input, Output, State, callback, callback_context, dash_table
 
 from app.maindash import app# , cache, long_callback_manager 
@@ -58,9 +60,11 @@ app.layout = html.Div([
 def display_selected_tags_table(tags):
     if len(tags) == 0:
         # return empty table with headers same as 'catalogue'
-        return catalogue.iloc[0:0].to_dict('records')
+        df = catalogue.iloc[0:0]
     else:
-        return catalogue[catalogue["Tag Number"].isin(tags)].sort_values(by="Last Measured Date").to_dict('records')
+        df = catalogue[catalogue["Tag Number"].isin(tags)].sort_values(by="Last Measured Date")
+        df["Last Measured Date"] = pd.DatetimeIndex(df["Last Measured Date"]).strftime("%b %d, %Y")
+    return df.to_dict('records')
 
 @app.callback(
     Output("selected-impedances-tbl", "data"),
@@ -69,9 +73,11 @@ def display_selected_tags_table(tags):
 def display_selected_tags_table(tags):
     if len(tags) == 0:
         # return empty table with headers same as 'impedances'
-        return impedances.iloc[0:0].to_dict('records')
+        df = impedances.iloc[0:0]
     else:
-        return impedances[impedances["Tag Number"].isin(tags)].sort_values(by="Measured Date").to_dict('records')
+        df = impedances[impedances["Tag Number"].isin(tags)].sort_values(by="Measured Date")
+        df["Measured Date"] = pd.DatetimeIndex(df["Measured Date"]).strftime("%b %d, %Y")
+    return df.to_dict('records')
 
 @app.long_callback(
     output=[Output("graph-abs", "figure"), Output("graph-rel", "figure"), Output("graph-mean", "figure")], 
