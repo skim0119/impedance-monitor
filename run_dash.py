@@ -104,7 +104,16 @@ def generate_plot(set_progress, tags):
         return fig, fig, fig
     else:
         df = create_histogram_dataframe(impedances, tags, set_progress)
-        return plot_impedance_progress_px(df)
+        impedance_headers = ["0.1~0.3", "0.3~0.5", "0.5~0.8", "0.8~1.0", "1.0~1.3", "1.3~1.6", "1.6~2.0"]  # columns
+        count = impedances[impedance_headers].astype(int).sum(axis=1)
+
+        # new dataframe from impedance, with the column "Measured Date" and "Tag Number" as multi-index, and active_electrode_count as value
+        active_electrode_count = pd.DataFrame({"date": impedances["Measured Date"], "tag": impedances["Tag Number"], "count": count})
+        active_electrode_count["first day"] = active_electrode_count.groupby('tag')['date'].transform(lambda x: x.min())
+        active_electrode_count["day in use"] = (active_electrode_count["date"] - active_electrode_count["first day"]).dt.days
+        #active_electrode_count.set_index(["date", "tag"], inplace=True)
+        #active_electrode_count.sort_index(inplace=True)
+        return plot_impedance_progress_px(df, active_electrode_count)
 
 
 if __name__ == "__main__":
