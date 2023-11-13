@@ -10,7 +10,7 @@ __pycache__/
 *.o
 
 cache
-credential.json
+credentials.json
 token.json
 
 # Distribution / packaging
