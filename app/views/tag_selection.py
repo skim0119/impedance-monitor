@@ -42,18 +42,25 @@ def get_tag_checklist(df):
         html.Br(style={'clear':'both'}),
         html.P(),
         #dbc.Button("Show Old MEA Tags:", id="collapse-button-show-old-tags", n_clicks=0, color="primary", className="mb-3"),
-        #dbc.Collapse(
-        html.H5("Old MEA Tags (>2 months):"),
-        html.Div(old_tag_checklists),
+        dbc.Collapse([
+            html.H5("Old MEA Tags (>2 months):"),
+            html.Div(old_tag_checklists),
+        ], id="collapse", is_open=False),
         html.Br(style={'clear':'both'}),
-        #    id="collapse",
-        #    is_open=False,
-        #    style={"visibility": "visible"},
-        #),
         dcc.Store(data=all_tag_list+old_tag_list, id="tag-checklist"),
     ])
 
     return tag_checklist
+
+@app.callback(
+    Output("collapse", "is_open"),
+    Input("check_include_old_tags", "value")
+)
+def toggle_old_tags(value):
+    if value:
+        return True
+    else:
+        return False
 
 #@app.callback(
 #    Output("collapse", "is_open"),

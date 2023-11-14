@@ -46,8 +46,13 @@ def get_sidebar(df):
             html.P("last recorded date"),
             html.P("maker"),
             html.P("number of electrodes"),
+            html.Hr(),
+            dcc.Checklist(
+                id="check_include_old_tags",
+                options=["Include old tags"],
+                value=[],
+            ),
         ],
         style=SIDEBAR_STYLE,
     )
     return sidebar
-
